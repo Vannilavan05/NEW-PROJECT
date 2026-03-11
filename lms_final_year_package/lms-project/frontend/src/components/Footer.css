@@ -1,0 +1,109 @@
+.footer {
+    background: hsl(var(--card));
+    border-top: 1px solid hsl(var(--border));
+    padding-top: 5rem;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr;
+    gap: 4rem;
+    padding-bottom: 4rem;
+}
+
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.footer-description {
+    color: hsl(var(--foreground) / 0.6);
+    line-height: 1.6;
+    max-width: 90%;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.social-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--foreground) / 0.7);
+    transition: all 0.2s ease;
+}
+
+.social-icon:hover {
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary));
+}
+
+.footer-links-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.footer-column h4 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: hsl(var(--foreground));
+}
+
+.footer-column a {
+    color: hsl(var(--foreground) / 0.6);
+    transition: color 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.footer-column a:hover {
+    color: hsl(var(--primary));
+}
+
+.footer-bottom {
+    border-top: 1px solid hsl(var(--border) / 0.5);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: hsl(var(--foreground) / 0.5);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .footer-links-group {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-links-group {
+        grid-template-columns: 1fr;
+    }
+}
