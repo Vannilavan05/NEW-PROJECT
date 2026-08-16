@@ -2,7 +2,7 @@
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Patients table
 CREATE TABLE IF NOT EXISTS patients (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     owner_user_id INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL,
     age INTEGER NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS patients (
 
 -- Medical Records table
 CREATE TABLE IF NOT EXISTS records (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     patient_id INTEGER NOT NULL,
     diagnosis TEXT,
     treatment TEXT,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS records (
 
 -- Scans table
 CREATE TABLE IF NOT EXISTS scans (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     patient_id INTEGER NOT NULL,
     scan_center_id INTEGER NOT NULL,
     scan_type VARCHAR(100),
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS scans (
 
 -- Prescriptions table
 CREATE TABLE IF NOT EXISTS prescriptions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     patient_id INTEGER NOT NULL,
     hospital_id INTEGER NOT NULL,
     medicines TEXT NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS prescriptions (
 
 -- Approvals table (for hospital access to patient records)
 CREATE TABLE IF NOT EXISTS approvals (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     patient_id INTEGER NOT NULL,
     hospital_id INTEGER NOT NULL,
     status VARCHAR(20) DEFAULT 'pending',
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS approvals (
 
 -- Audit Logs table
 CREATE TABLE IF NOT EXISTS audit_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER NOT NULL,
     action VARCHAR(100),
     entity_type VARCHAR(100),
@@ -104,7 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_approvals_hospital ON approvals(hospital_id);
 
 -- Pharmacy Inventory table
 CREATE TABLE IF NOT EXISTS pharmacy_inventory (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     pharmacy_id INTEGER NOT NULL,
     medicine_name VARCHAR(255) NOT NULL,
     stock_quantity INTEGER NOT NULL,

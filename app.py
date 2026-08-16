@@ -8,6 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 import sqlite3
+from flask_mysqldb import MySQL
+import MySQLdb.cursors
 import qrcode
 import io
 import os
@@ -19,21 +21,18 @@ from flask import jsonify
 app = Flask(__name__)
 app.secret_key = 'sihms_secret_key_2026'
 
-# SQLite Configuration
-DATABASE = 'database.db'
+# MySQL Configuration
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''  # XAMPP default is empty
+app.config['MYSQL_DB'] = 'sihms_db'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
+mysql = MySQL(app)
 
 def get_db():
-    conn = sqlite3.connect(DATABASE, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return mysql.connection
 
-def init_db():
-    if not os.path.exists(DATABASE):
-        with app.app_context():
-            db = get_db()
-            with app.open_resource('database_schema.sql', mode='r') as f:
-                db.cursor().executescript(f.read())
-            db.commit()
 
 # File Upload Configuration
 UPLOAD_FOLDER = 'uploads'
@@ -84,7 +83,7 @@ def log_audit(user_id, action, entity_type, entity_id):
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO audit_logs (user_id, action, entity_type, entity_id, timestamp)
-            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
         """, (user_id, action, entity_type, entity_id))
         conn.commit()
     except Exception as e:
@@ -116,7 +115,7 @@ def login():
 
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
         user = cursor.fetchone()
 
         if user and check_password_hash(user['password'], password):
@@ -153,7 +152,7 @@ def register():
 
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
         user = cursor.fetchone()
 
         if user:
@@ -166,7 +165,7 @@ def register():
             hashed_password = generate_password_hash(password)
             cursor.execute("""
                 INSERT INTO users (username, password, role, organization, created_at)
-                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+                VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
             """, (username, hashed_password, role, organization))
             conn.commit()
 
@@ -198,15 +197,15 @@ def hospital_dashboard():
     cursor = conn.cursor()
     
     # Get stats
-    cursor.execute('SELECT COUNT(*) as count FROM approvals WHERE hospital_id = ? AND status = "approved"', 
+    cursor.execute('SELECT COUNT(*) as count FROM approvals WHERE hospital_id = %s AND status = "approved"', 
                    (session['id'],))
     approved_patients = cursor.fetchone()['count']
     
-    cursor.execute('SELECT COUNT(*) as count FROM approvals WHERE hospital_id = ? AND status = "pending"', 
+    cursor.execute('SELECT COUNT(*) as count FROM approvals WHERE hospital_id = %s AND status = "pending"', 
                    (session['id'],))
     pending_approvals = cursor.fetchone()['count']
     
-    cursor.execute('SELECT COUNT(*) as count FROM prescriptions WHERE hospital_id = ?', 
+    cursor.execute('SELECT COUNT(*) as count FROM prescriptions WHERE hospital_id = %s', 
                    (session['id'],))
     prescriptions_count = cursor.fetchone()['count']
 
@@ -231,7 +230,7 @@ def hospital_request_access():
         
         # Search by ID or QR code
         cursor.execute("""
-            SELECT id FROM patients WHERE id = ? OR qr_code = ? LIMIT 1
+            SELECT id FROM patients WHERE id = %s OR qr_code = %s LIMIT 1
         """, (patient_id_or_qr, patient_id_or_qr))
         
         patient = cursor.fetchone()
@@ -243,7 +242,7 @@ def hospital_request_access():
             
             # Check if approval already exists
             cursor.execute("""
-                SELECT * FROM approvals WHERE patient_id = ? AND hospital_id = ?
+                SELECT * FROM approvals WHERE patient_id = %s AND hospital_id = %s
             """, (patient_id, session['id']))
             
             existing = cursor.fetchone()
@@ -254,7 +253,7 @@ def hospital_request_access():
                 # Create approval request
                 cursor.execute("""
                     INSERT INTO approvals (patient_id, hospital_id, status, requested_at)
-                    VALUES (?, ?, 'pending', CURRENT_TIMESTAMP)
+                    VALUES (%s, %s, 'pending', CURRENT_TIMESTAMP)
                 """, (patient_id, session['id']))
                 conn.commit()
 
@@ -274,7 +273,7 @@ def hospital_view_patients():
     cursor.execute("""
         SELECT DISTINCT p.* FROM patients p
         INNER JOIN approvals a ON p.id = a.patient_id
-        WHERE a.hospital_id = ? AND a.status = 'approved'
+        WHERE a.hospital_id = %s AND a.status = 'approved'
         ORDER BY p.created_at DESC
     """, (session['id'],))
     
@@ -292,7 +291,7 @@ def hospital_patient_records(patient_id):
     
     # Check approval
     cursor.execute("""
-        SELECT * FROM approvals WHERE patient_id = ? AND hospital_id = ? AND status = 'approved'
+        SELECT * FROM approvals WHERE patient_id = %s AND hospital_id = %s AND status = 'approved'
     """, (patient_id, session['id']))
     
     if not cursor.fetchone():
@@ -300,15 +299,15 @@ def hospital_patient_records(patient_id):
         return redirect(url_for('hospital_view_patients'))
 
     # Get patient info
-    cursor.execute('SELECT * FROM patients WHERE id = ?', (patient_id,))
+    cursor.execute('SELECT * FROM patients WHERE id = %s', (patient_id,))
     patient = cursor.fetchone()
 
     # Get records
-    cursor.execute('SELECT * FROM records WHERE patient_id = ? ORDER BY created_at DESC', (patient_id,))
+    cursor.execute('SELECT * FROM records WHERE patient_id = %s ORDER BY created_at DESC', (patient_id,))
     records = cursor.fetchall()
 
     # Get scans
-    cursor.execute('SELECT * FROM scans WHERE patient_id = ? ORDER BY created_at DESC', (patient_id,))
+    cursor.execute('SELECT * FROM scans WHERE patient_id = %s ORDER BY created_at DESC', (patient_id,))
     scans = cursor.fetchall()
 
     return render_template('hospital/patient_records.html', patient=patient, records=records, scans=scans)
@@ -323,7 +322,7 @@ def hospital_upload_prescription(patient_id):
     
     # Verify access
     cursor.execute("""
-        SELECT * FROM approvals WHERE patient_id = ? AND hospital_id = ? AND status = 'approved'
+        SELECT * FROM approvals WHERE patient_id = %s AND hospital_id = %s AND status = 'approved'
     """, (patient_id, session['id']))
     
     if not cursor.fetchone():
@@ -338,7 +337,7 @@ def hospital_upload_prescription(patient_id):
 
         cursor.execute("""
             INSERT INTO prescriptions (patient_id, hospital_id, medicines, dosage, duration, notes, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
         """, (patient_id, session['id'], medicines, dosage, duration, notes))
         conn.commit()
 
@@ -360,7 +359,7 @@ def scan_centre_dashboard():
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT COUNT(*) as count FROM scans WHERE scan_center_id = ?', (session['id'],))
+    cursor.execute('SELECT COUNT(*) as count FROM scans WHERE scan_center_id = %s', (session['id'],))
     total_scans = cursor.fetchone()['count']
 
     stats = {'total_scans': total_scans}
@@ -384,7 +383,7 @@ def scan_centre_upload_report():
         
         # Find patient
         cursor.execute("""
-            SELECT id FROM patients WHERE id = ? OR qr_code = ? LIMIT 1
+            SELECT id FROM patients WHERE id = %s OR qr_code = %s LIMIT 1
         """, (patient_id_or_qr, patient_id_or_qr))
         
         patient = cursor.fetchone()
@@ -403,7 +402,7 @@ def scan_centre_upload_report():
             # Save to database
             cursor.execute("""
                 INSERT INTO scans (patient_id, scan_center_id, scan_type, report_path, diagnosis, created_at)
-                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
             """, (patient['id'], session['id'], scan_type, filename, diagnosis))
             conn.commit()
 
@@ -422,7 +421,7 @@ def scan_centre_view_reports():
     cursor = conn.cursor()
     
     cursor.execute("""
-        SELECT * FROM scans WHERE scan_center_id = ? ORDER BY created_at DESC
+        SELECT * FROM scans WHERE scan_center_id = %s ORDER BY created_at DESC
     """, (session['id'],))
     
     scans = cursor.fetchall()
@@ -442,20 +441,20 @@ def patient_dashboard():
     cursor = conn.cursor()
     
     # Get patient profile
-    cursor.execute('SELECT * FROM patients WHERE owner_user_id = ?', (session['id'],))
+    cursor.execute('SELECT * FROM patients WHERE owner_user_id = %s', (session['id'],))
     patient = cursor.fetchone()
 
     if not patient:
         return redirect(url_for('patient_create_profile'))
 
     # Get stats
-    cursor.execute('SELECT COUNT(*) as count FROM records WHERE patient_id = ?', (patient['id'],))
+    cursor.execute('SELECT COUNT(*) as count FROM records WHERE patient_id = %s', (patient['id'],))
     total_records = cursor.fetchone()['count']
     
-    cursor.execute('SELECT COUNT(*) as count FROM scans WHERE patient_id = ?', (patient['id'],))
+    cursor.execute('SELECT COUNT(*) as count FROM scans WHERE patient_id = %s', (patient['id'],))
     total_scans = cursor.fetchone()['count']
     
-    cursor.execute('SELECT COUNT(*) as count FROM approvals WHERE patient_id = ? AND status = "pending"', (patient['id'],))
+    cursor.execute('SELECT COUNT(*) as count FROM approvals WHERE patient_id = %s AND status = "pending"', (patient['id'],))
     pending_approvals = cursor.fetchone()['count']
 
     stats = {
@@ -475,7 +474,7 @@ def patient_create_profile():
     cursor = conn.cursor()
     
     # Check if profile already exists
-    cursor.execute('SELECT * FROM patients WHERE owner_user_id = ?', (session['id'],))
+    cursor.execute('SELECT * FROM patients WHERE owner_user_id = %s', (session['id'],))
     if cursor.fetchone():
         return redirect(url_for('patient_dashboard'))
 
@@ -491,7 +490,7 @@ def patient_create_profile():
 
         cursor.execute("""
             INSERT INTO patients (owner_user_id, name, age, blood_group, phone, address, qr_code, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
         """, (session['id'], name, age, blood_group, phone, address, qr_data))
         conn.commit()
 
@@ -509,7 +508,7 @@ def patient_view_records():
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM patients WHERE owner_user_id = ?', (session['id'],))
+    cursor.execute('SELECT * FROM patients WHERE owner_user_id = %s', (session['id'],))
     patient = cursor.fetchone()
 
     if not patient:
@@ -517,15 +516,15 @@ def patient_view_records():
         return redirect(url_for('patient_create_profile'))
 
     # Get all records
-    cursor.execute('SELECT * FROM records WHERE patient_id = ? ORDER BY created_at DESC', (patient['id'],))
+    cursor.execute('SELECT * FROM records WHERE patient_id = %s ORDER BY created_at DESC', (patient['id'],))
     records = cursor.fetchall()
 
     # Get all scans
-    cursor.execute('SELECT * FROM scans WHERE patient_id = ? ORDER BY created_at DESC', (patient['id'],))
+    cursor.execute('SELECT * FROM scans WHERE patient_id = %s ORDER BY created_at DESC', (patient['id'],))
     scans = cursor.fetchall()
 
     # Get prescriptions
-    cursor.execute('SELECT * FROM prescriptions WHERE patient_id = ? ORDER BY created_at DESC', (patient['id'],))
+    cursor.execute('SELECT * FROM prescriptions WHERE patient_id = %s ORDER BY created_at DESC', (patient['id'],))
     prescriptions = cursor.fetchall()
 
     return render_template('patient/view_records.html', patient=patient, records=records, scans=scans, prescriptions=prescriptions)
@@ -538,7 +537,7 @@ def patient_manage_approvals():
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM patients WHERE owner_user_id = ?', (session['id'],))
+    cursor.execute('SELECT * FROM patients WHERE owner_user_id = %s', (session['id'],))
     patient = cursor.fetchone()
 
     if not patient:
@@ -549,7 +548,7 @@ def patient_manage_approvals():
     cursor.execute("""
         SELECT a.*, u.organization FROM approvals a
         JOIN users u ON a.hospital_id = u.id
-        WHERE a.patient_id = ?
+        WHERE a.patient_id = %s
         ORDER BY a.requested_at DESC
     """, (patient['id'],))
     
@@ -569,7 +568,7 @@ def patient_update_approval(approval_id, action):
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM approvals WHERE id = ?', (approval_id,))
+    cursor.execute('SELECT * FROM approvals WHERE id = %s', (approval_id,))
     approval = cursor.fetchone()
 
     if not approval:
@@ -577,7 +576,7 @@ def patient_update_approval(approval_id, action):
         return redirect(url_for('patient_manage_approvals'))
 
     # Verify ownership
-    cursor.execute('SELECT * FROM patients WHERE id = ? AND owner_user_id = ?', 
+    cursor.execute('SELECT * FROM patients WHERE id = %s AND owner_user_id = %s', 
                    (approval['patient_id'], session['id']))
     
     if not cursor.fetchone():
@@ -586,7 +585,7 @@ def patient_update_approval(approval_id, action):
 
     status = 'approved' if action == 'approve' else 'rejected'
     cursor.execute("""
-        UPDATE approvals SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        UPDATE approvals SET status = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s
     """, (status, approval_id))
     conn.commit()
 
@@ -603,7 +602,7 @@ def patient_qr_code():
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM patients WHERE owner_user_id = ?', (session['id'],))
+    cursor.execute('SELECT * FROM patients WHERE owner_user_id = %s', (session['id'],))
     patient = cursor.fetchone()
 
     if not patient:
@@ -627,7 +626,7 @@ def patient_download_records():
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM patients WHERE owner_user_id = ?', (session['id'],))
+    cursor.execute('SELECT * FROM patients WHERE owner_user_id = %s', (session['id'],))
     patient = cursor.fetchone()
 
     if not patient:
@@ -635,13 +634,13 @@ def patient_download_records():
         return redirect(url_for('patient_create_profile'))
 
     # Get all data
-    cursor.execute('SELECT * FROM records WHERE patient_id = ?', (patient['id'],))
+    cursor.execute('SELECT * FROM records WHERE patient_id = %s', (patient['id'],))
     records = cursor.fetchall()
 
-    cursor.execute('SELECT * FROM scans WHERE patient_id = ?', (patient['id'],))
+    cursor.execute('SELECT * FROM scans WHERE patient_id = %s', (patient['id'],))
     scans = cursor.fetchall()
 
-    cursor.execute('SELECT * FROM prescriptions WHERE patient_id = ?', (patient['id'],))
+    cursor.execute('SELECT * FROM prescriptions WHERE patient_id = %s', (patient['id'],))
     prescriptions = cursor.fetchall()
 
     # Create JSON export
@@ -716,7 +715,7 @@ def pharmacy_update_status(prescription_id):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        UPDATE prescriptions SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        UPDATE prescriptions SET status = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s
     """, (status, prescription_id))
     conn.commit()
 
@@ -771,7 +770,7 @@ def scan_centre_search_patient():
         patient_id_or_qr = request.form.get('patient_id_or_qr', '')
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM patients WHERE id = ? OR qr_code = ? LIMIT 1", (patient_id_or_qr, patient_id_or_qr))
+        cursor.execute("SELECT * FROM patients WHERE id = %s OR qr_code = %s LIMIT 1", (patient_id_or_qr, patient_id_or_qr))
         patient = cursor.fetchone()
         
         if patient:
@@ -798,9 +797,9 @@ def pharmacy_inventory():
             try:
                 cursor.execute("""
                     INSERT INTO pharmacy_inventory (pharmacy_id, medicine_name, stock_quantity)
-                    VALUES (?, ?, ?)
+                    VALUES (%s, %s, %s)
                     ON CONFLICT(pharmacy_id, medicine_name) DO UPDATE SET
-                    stock_quantity = ?, last_updated = CURRENT_TIMESTAMP
+                    stock_quantity = %s, last_updated = CURRENT_TIMESTAMP
                 """, (session['id'], medicine_name, stock_quantity, stock_quantity))
                 conn.commit()
                 flash(f'Updated stock for {medicine_name}', 'success')
@@ -811,7 +810,7 @@ def pharmacy_inventory():
             
         return redirect(url_for('pharmacy_inventory'))
         
-    cursor.execute("SELECT * FROM pharmacy_inventory WHERE pharmacy_id = ? ORDER BY medicine_name ASC", (session['id'],))
+    cursor.execute("SELECT * FROM pharmacy_inventory WHERE pharmacy_id = %s ORDER BY medicine_name ASC", (session['id'],))
     inventory = cursor.fetchall()
     
     return render_template('pharmacy/inventory.html', inventory=inventory)
@@ -831,7 +830,7 @@ def hospital_search_pharmacy():
         SELECT u.username as pharmacy_name, pi.medicine_name, pi.stock_quantity, pi.last_updated
         FROM pharmacy_inventory pi
         JOIN users u ON pi.pharmacy_id = u.id
-        WHERE pi.medicine_name LIKE ? AND pi.stock_quantity > 0
+        WHERE pi.medicine_name LIKE %s AND pi.stock_quantity > 0
         ORDER BY pi.stock_quantity DESC
         LIMIT 20
     """, ('%' + query + '%',))
@@ -839,10 +838,48 @@ def hospital_search_pharmacy():
     results = [dict(row) for row in cursor.fetchall()]
     return jsonify(results)
 
+
+@app.route('/hospital/analytics')
+@login_required
+@role_required('hospital')
+def hospital_analytics():
+    import pandas as pd
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Big Data Analytics Simulation using Pandas
+    # 1. Fetch all prescriptions to analyze medicine popularity
+    cursor.execute("SELECT medicines, created_at FROM prescriptions WHERE hospital_id = %s", (session['id'],))
+    prescriptions = cursor.fetchall()
+    
+    if not prescriptions:
+        return render_template('hospital/analytics.html', no_data=True)
+        
+    df_pres = pd.DataFrame(prescriptions)
+    
+    # Process unstructured text (medicines) into actionable insights
+    # Split multiline text and strip whitespace
+    all_meds = []
+    for med_text in df_pres['medicines']:
+        meds = [m.strip() for m in med_text.split('\n') if m.strip()]
+        all_meds.extend(meds)
+        
+    df_meds = pd.DataFrame(all_meds, columns=['Medicine'])
+    med_counts = df_meds['Medicine'].value_counts().head(5).to_dict()
+    
+    # 2. Fetch scan data across the network to identify trends (Simulating big data aggregation)
+    cursor.execute("SELECT scan_type, COUNT(*) as count FROM scans GROUP BY scan_type")
+    scan_trends_raw = cursor.fetchall()
+    scan_trends = {s['scan_type']: s['count'] for s in scan_trends_raw}
+    
+    return render_template('hospital/analytics.html', 
+                          med_counts=med_counts,
+                          scan_trends=scan_trends,
+                          total_prescriptions=len(df_pres))
+
 # ============================================================================
 # RUN APP
 # ============================================================================
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='127.0.0.1', port=5000)

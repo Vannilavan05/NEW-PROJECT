@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Big Data Analytics{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="fas fa-chart-line text-primary me-2"></i> Big Data Analytics Dashboard</h2>
+
+{% if no_data %}
+<div class="glass-card p-5 text-center text-muted">
+    <i class="fas fa-folder-open fa-3x mb-3 text-light"></i>
+    <h4>No Data Available</h4>
+    <p>We need more prescription data to run our analytics engine.</p>
+</div>
+{% else %}
+<div class="row">
+    <!-- Top Medicines -->
+    <div class="col-md-6 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold text-primary mb-3">Top Prescribed Medicines</h4>
+            <p class="text-muted small">Aggregated from {{ total_prescriptions }} prescriptions using Pandas Data Processing.</p>
+            <canvas id="medChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+    
+    <!-- Scan Trends -->
+    <div class="col-md-6 mb-4">
+        <div class="glass-card p-4 h-100">
+            <h4 class="fw-bold text-info mb-3">Network Scan Trends</h4>
+            <p class="text-muted small">Regional big data analysis of most common scanning procedures.</p>
+            <canvas id="scanChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Medicine Chart
+    const medCtx = document.getElementById('medChart').getContext('2d');
+    const medData = {{ med_counts | tojson }};
+    new Chart(medCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(medData),
+            datasets: [{
+                label: 'Prescription Frequency',
+                data: Object.values(medData),
+                backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Scan Chart
+    const scanCtx = document.getElementById('scanChart').getContext('2d');
+    const scanData = {{ scan_trends | tojson }};
+    new Chart(scanCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(scanData),
+            datasets: [{
+                data: Object.values(scanData),
+                backgroundColor: [
+                    '#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, cutout: '70%' }
+    });
+</script>
+{% endif %}
+{% endblock %}
