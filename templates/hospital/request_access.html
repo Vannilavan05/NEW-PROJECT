@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Request Access{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="glass-card p-5">
+            <h3 class="fw-bold mb-4 text-center">Request Patient Access</h3>
+            <p class="text-muted text-center mb-4">Scan the patient's QR Code string or enter their Patient ID to request access to their medical records.</p>
+            <form method="POST">
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Patient ID or QR Code</label>
+                    <input type="text" class="form-control form-control-lg" name="patient_id_or_qr" required placeholder="e.g., SIHMS_12_168...">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill"><i class="fas fa-paper-plane me-2"></i> Send Request</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

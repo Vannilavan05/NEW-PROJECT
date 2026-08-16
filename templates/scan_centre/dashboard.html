@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Scan Centre Dashboard{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="fas fa-x-ray text-primary me-2"></i> Scan Centre Dashboard</h2>
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 text-center">
+            <h1 class="display-4 fw-bold text-info">{{ stats.total_scans }}</h1>
+            <p class="text-muted fw-medium mb-3">Total Scans Uploaded</p>
+            <a href="/scan_centre/reports" class="btn btn-outline-info rounded-pill">View All Uploads</a>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center">
+            <h4 class="fw-bold">Search Patient</h4>
+            <p class="text-muted small">Find a patient via QR or ID before uploading a report.</p>
+            <a href="/scan_centre/search-patient" class="btn btn-primary rounded-pill mt-2">Search Patient</a>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center border-primary" style="border: 2px dashed var(--primary);">
+            <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+            <h4 class="fw-bold">Upload Report</h4>
+            <a href="/scan_centre/upload-report" class="btn btn-primary rounded-pill mt-2">Upload Now</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

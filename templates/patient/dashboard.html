@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4">Welcome back, {{ session.username }}</h2>
+{% if not patient %}
+<div class="alert alert-warning shadow-sm border-0 rounded-4">
+    <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> Profile Incomplete</h4>
+    <p>Please create your patient profile to generate your unique QR Code and start managing your health records.</p>
+    <a href="/patient/create-profile" class="btn btn-warning rounded-pill mt-2">Create Profile Now</a>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column align-items-center justify-content-center">
+            <h5 class="fw-bold text-primary mb-3">Your Medical QR Code</h5>
+            <div class="qr-container bg-white p-2 rounded-4 shadow-sm mb-3 d-inline-block">
+                <img src="/patient/qr-code" alt="QR Code" class="img-fluid" style="width: 200px; height: 200px;">
+            </div>
+            <p class="small text-muted mb-0">Show this QR code to hospitals or scan centres to grant them access to your profile.</p>
+        </div>
+    </div>
+    <div class="col-md-8 mb-4">
+        <div class="row h-100">
+            <div class="col-sm-6 mb-4">
+                <div class="glass-card p-4 text-center h-100">
+                    <h1 class="display-4 fw-bold text-info">{{ stats.total_records }}</h1>
+                    <p class="text-muted fw-medium mb-0">Medical Records</p>
+                </div>
+            </div>
+            <div class="col-sm-6 mb-4">
+                <div class="glass-card p-4 text-center h-100">
+                    <h1 class="display-4 fw-bold text-success">{{ stats.total_scans }}</h1>
+                    <p class="text-muted fw-medium mb-0">Scan Reports</p>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="glass-card p-4 text-center">
+                    <h1 class="display-4 fw-bold text-warning">{{ stats.pending_approvals }}</h1>
+                    <p class="text-muted fw-medium mb-3">Pending Access Requests</p>
+                    <a href="/patient/manage-approvals" class="btn btn-outline-warning rounded-pill">Manage Requests</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

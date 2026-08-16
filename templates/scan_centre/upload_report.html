@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Upload Scan Report{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="glass-card p-5">
+            <h3 class="fw-bold mb-4 text-center">Upload Scan Report</h3>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Patient ID or QR Code String</label>
+                    <input type="text" class="form-control" name="patient_id_or_qr" required placeholder="e.g. SIHMS_12_168..." value="{{ request.args.get('patient_id', '') }}">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Scan Type</label>
+                    <select class="form-select form-control" name="scan_type" required>
+                        <option value="X-Ray">X-Ray</option>
+                        <option value="MRI">MRI</option>
+                        <option value="CT Scan">CT Scan</option>
+                        <option value="Ultrasound">Ultrasound</option>
+                        <option value="Blood Test">Blood Test Report</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Diagnosis / Summary</label>
+                    <textarea class="form-control" name="diagnosis" rows="3" placeholder="Brief summary of findings..."></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Report File (PDF/Image)</label>
+                    <input type="file" class="form-control" name="report_file" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill"><i class="fas fa-upload me-2"></i> Upload Report to Patient Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

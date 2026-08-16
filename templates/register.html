@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Register - SIHMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="glass-card p-5">
+            <div class="text-center mb-4">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                    <i class="fas fa-user-plus fa-2x text-primary"></i>
+                </div>
+                <h3 class="fw-bold">Create an Account</h3>
+                <p class="text-muted small">Join the SIHMS network today.</p>
+            </div>
+
+            <form method="POST" action="/register">
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Username</label>
+                    <input type="text" class="form-control" name="username" required placeholder="Choose a username">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Password</label>
+                    <input type="password" class="form-control" name="password" required placeholder="Minimum 6 characters">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Confirm Password</label>
+                    <input type="password" class="form-control" name="confirm_password" required placeholder="Repeat password">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Account Type</label>
+                    <select class="form-select form-control" name="role" id="roleSelect" required>
+                        <option value="patient">Patient</option>
+                        <option value="hospital">Hospital / Doctor</option>
+                        <option value="scan_centre">Scan Centre</option>
+                        <option value="pharmacy">Pharmacy</option>
+                    </select>
+                </div>
+
+                <div class="mb-4" id="orgDiv" style="display: none;">
+                    <label class="form-label fw-medium">Organization Name</label>
+                    <input type="text" class="form-control" name="organization" placeholder="e.g. City Hospital">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mb-3 py-2">Create Account</button>
+                
+                <p class="text-center text-muted small mb-0">
+                    Already have an account? <a href="/login" class="text-primary fw-bold text-decoration-none">Log in</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('roleSelect').addEventListener('change', function() {
+        const orgDiv = document.getElementById('orgDiv');
+        if(this.value === 'patient') {
+            orgDiv.style.display = 'none';
+        } else {
+            orgDiv.style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}

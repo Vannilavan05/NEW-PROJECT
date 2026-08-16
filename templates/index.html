@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Home - SIHMS{% endblock %}
+
+{% block content %}
+<div class="row align-items-center min-vh-75 py-5">
+    <div class="col-lg-6">
+        <h1 class="display-3 fw-bold mb-4" style="color: var(--dark); letter-spacing: -1px;">
+            The Future of <span style="color: var(--primary);">Healthcare</span> Management.
+        </h1>
+        <p class="lead mb-5 text-muted" style="font-size: 1.25rem; line-height: 1.8;">
+            Secure Integrated Healthcare Management System (SIHMS) connects patients, hospitals, scan centres, and pharmacies in one unified, secure platform powered by QR code technology.
+        </p>
+        <div class="d-flex gap-3">
+            <a href="/register" class="btn btn-primary btn-lg rounded-pill px-5">Get Started</a>
+            <a href="/login" class="btn btn-outline-primary btn-lg rounded-pill px-5">Login</a>
+        </div>
+    </div>
+    <div class="col-lg-6 mt-5 mt-lg-0 text-center">
+        <div class="glass-card p-4 d-inline-block position-relative">
+            <div class="position-absolute top-0 start-0 translate-middle p-3 bg-white rounded-circle shadow-lg" style="z-index: 10;">
+                <i class="fas fa-qrcode fa-2x text-primary"></i>
+            </div>
+            <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80" alt="Healthcare" class="img-fluid rounded-4 shadow-sm" style="max-height: 400px; object-fit: cover;">
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 pt-5 text-center">
+    <div class="col-md-3 mb-4">
+        <div class="glass-card p-4 h-100">
+            <i class="fas fa-hospital stat-icon mb-3"></i>
+            <h4 class="fw-bold">Hospitals</h4>
+            <p class="text-muted small">Access patient history and upload digital prescriptions securely.</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="glass-card p-4 h-100">
+            <i class="fas fa-user-injured stat-icon mb-3"></i>
+            <h4 class="fw-bold">Patients</h4>
+            <p class="text-muted small">Control your medical data with personal QR code sharing.</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="glass-card p-4 h-100">
+            <i class="fas fa-x-ray stat-icon mb-3"></i>
+            <h4 class="fw-bold">Scan Centres</h4>
+            <p class="text-muted small">Upload diagnostic reports directly to the patient's profile.</p>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="glass-card p-4 h-100">
+            <i class="fas fa-pills stat-icon mb-3"></i>
+            <h4 class="fw-bold">Pharmacies</h4>
+            <p class="text-muted small">Verify and fulfill digital prescriptions instantly.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

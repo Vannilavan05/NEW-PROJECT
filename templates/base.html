@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SIHMS Premium{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #10B981;
+            --dark: #1E293B;
+            --light: #F8FAFC;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+        }
+        
+        body { 
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+        
+        .navbar { 
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary) !important;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--dark) !important;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary) !important;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #4338CA;
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+            padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            border-color: var(--primary);
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), #818CF8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .qr-container img {
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            padding: 10px;
+            background: white;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heartbeat me-2"></i> SIHMS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    {% if session.get('loggedin') %}
+                        {% if session.get('role') == 'hospital' %}
+                            <li class="nav-item"><a class="nav-link" href="/hospital/dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/hospital/request-access">Request Access</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/hospital/patients">Patients</a></li>
+                        {% elif session.get('role') == 'patient' %}
+                            <li class="nav-item"><a class="nav-link" href="/patient/dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/patient/view-records">My Records</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/patient/manage-approvals">Approvals</a></li>
+                        {% elif session.get('role') == 'scan_centre' %}
+                            <li class="nav-item"><a class="nav-link" href="/scan_centre/dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/scan_centre/upload-report">Upload Scan</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/scan_centre/reports">View Scans</a></li>
+                        {% elif session.get('role') == 'pharmacy' %}
+                            <li class="nav-item"><a class="nav-link" href="/pharmacy/dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/pharmacy/prescriptions">Prescriptions</a></li>
+                        {% endif %}
+                        <li class="nav-item ms-3">
+                            <span class="badge bg-primary rounded-pill px-3 py-2">
+                                <i class="fas fa-user me-1"></i> {{ session.get('username') }}
+                            </span>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-outline-danger btn-sm rounded-pill px-3" href="/logout">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Login</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-primary rounded-pill px-4" href="/register">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 rounded-4" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

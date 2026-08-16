@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Patient Prescriptions{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4">Patient Prescriptions</h2>
+<div class="row">
+    {% for pres in prescriptions %}
+    <div class="col-md-6 mb-4">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">Patient #{{ pres.patient_id }}</h5>
+                    <small class="text-muted">Issued by Hospital #{{ pres.hospital_id }} on {{ pres.created_at }}</small>
+                </div>
+                <span class="badge bg-{{ 'success' if pres.status == 'fulfilled' else 'warning text-dark' }} px-3 py-2 rounded-pill">
+                    {{ pres.status|upper }}
+                </span>
+            </div>
+            
+            <div class="bg-light p-3 rounded-3 border mb-3">
+                <p class="mb-2 fw-medium text-primary">Medicines:</p>
+                <p class="mb-0" style="white-space: pre-line;">{{ pres.medicines }}</p>
+            </div>
+            
+            <div class="row mb-3 small">
+                <div class="col-6"><strong>Dosage:</strong> {{ pres.dosage }}</div>
+                <div class="col-6"><strong>Duration:</strong> {{ pres.duration }}</div>
+            </div>
+            
+            {% if pres.notes %}
+            <p class="small text-muted mb-3"><strong>Notes:</strong> {{ pres.notes }}</p>
+            {% endif %}
+            
+            {% if pres.status == 'pending' %}
+            <form action="/pharmacy/fulfill-prescription/{{ pres.id }}" method="POST">
+                <button type="submit" class="btn btn-success w-100 rounded-pill"><i class="fas fa-check-circle me-2"></i> Mark as Fulfilled</button>
+            </form>
+            {% else %}
+            <button class="btn btn-secondary w-100 rounded-pill" disabled><i class="fas fa-check-double me-2"></i> Already Fulfilled</button>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">
+        <i class="fas fa-prescription-bottle fa-3x mb-3 text-light"></i>
+        <p>No pending prescriptions.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

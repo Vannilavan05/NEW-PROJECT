@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}My Records{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4">My Medical History</h2>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <h4 class="fw-bold mb-3"><i class="fas fa-file-prescription text-primary me-2"></i> Prescriptions</h4>
+        {% for pres in prescriptions %}
+        <div class="glass-card p-3 mb-3 border-start border-4 border-primary">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-{{ 'success' if pres.status == 'fulfilled' else 'warning text-dark' }}">{{ pres.status|title }}</span>
+                <small class="text-muted">{{ pres.created_at }}</small>
+            </div>
+            <p class="mb-1"><strong>Medicines:</strong><br>{{ pres.medicines | replace('
+', '<br>') | safe }}</p>
+            <p class="mb-0 small text-muted"><i class="fas fa-clock me-1"></i> {{ pres.duration }} | {{ pres.dosage }}</p>
+        </div>
+        {% else %}
+        <div class="glass-card p-4 text-center text-muted">No prescriptions found.</div>
+        {% endfor %}
+    </div>
+    <div class="col-md-6 mb-4">
+        <h4 class="fw-bold mb-3"><i class="fas fa-x-ray text-info me-2"></i> Scans & Reports</h4>
+        {% for scan in scans %}
+        <div class="glass-card p-3 mb-3 border-start border-4 border-info">
+            <h5 class="text-info mb-1">{{ scan.scan_type }}</h5>
+            <small class="text-muted d-block mb-2">{{ scan.created_at }}</small>
+            <p class="mb-0">{{ scan.diagnosis }}</p>
+        </div>
+        {% else %}
+        <div class="glass-card p-4 text-center text-muted">No scan reports found.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

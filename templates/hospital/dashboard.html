@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Hospital Dashboard{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="fw-bold"><i class="fas fa-hospital text-primary me-2"></i> Hospital Dashboard</h2>
+</div>
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 text-center">
+            <h1 class="display-4 fw-bold text-primary">{{ stats.approved_patients }}</h1>
+            <p class="text-muted fw-medium mb-0">Approved Patients</p>
+            <a href="/hospital/patients" class="btn btn-sm btn-outline-primary mt-3 rounded-pill">View All</a>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 text-center">
+            <h1 class="display-4 fw-bold text-warning">{{ stats.pending_approvals }}</h1>
+            <p class="text-muted fw-medium mb-0">Pending Requests</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 text-center">
+            <h1 class="display-4 fw-bold text-success">{{ stats.prescriptions }}</h1>
+            <p class="text-muted fw-medium mb-0">Prescriptions Issued</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

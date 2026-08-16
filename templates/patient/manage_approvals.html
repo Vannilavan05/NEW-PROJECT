@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Manage Approvals{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="fas fa-shield-alt text-primary me-2"></i> Access Requests</h2>
+<div class="glass-card p-4">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Date Requested</th>
+                    <th>Hospital ID</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in approvals %}
+                <tr>
+                    <td>{{ a.requested_at }}</td>
+                    <td class="fw-medium">Hospital #{{ a.hospital_id }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if a.status == 'approved' else 'warning text-dark' if a.status == 'pending' else 'danger' }}">
+                            {{ a.status|title }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if a.status == 'pending' %}
+                        <div class="d-flex gap-2">
+                            <form action="/patient/approve-access/{{ a.id }}" method="POST"><button type="submit" class="btn btn-sm btn-success rounded-pill px-3"><i class="fas fa-check me-1"></i> Approve</button></form>
+                            <form action="/patient/reject-access/{{ a.id }}" method="POST"><button type="submit" class="btn btn-sm btn-danger rounded-pill px-3"><i class="fas fa-times me-1"></i> Reject</button></form>
+                        </div>
+                        {% else %}
+                        <span class="text-muted small">Action Taken</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center py-4 text-muted">No access requests.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Pharmacy Dashboard{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="fas fa-pills text-primary me-2"></i> Pharmacy Dashboard</h2>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center">
+            <h1 class="display-4 fw-bold text-warning">{{ stats.pending_prescriptions }}</h1>
+            <p class="text-muted fw-medium mb-3">Pending Prescriptions</p>
+            <a href="/pharmacy/prescriptions" class="btn btn-outline-warning rounded-pill text-dark">View & Fulfill</a>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center border-success" style="border: 2px dashed var(--bs-success);">
+            <i class="fas fa-boxes fa-3x text-success mb-3"></i>
+            <h4 class="fw-bold">Manage Inventory</h4>
+            <p class="text-muted small">Update your medicine stock levels so hospitals can find them.</p>
+            <a href="/pharmacy/inventory" class="btn btn-success rounded-pill mt-2">Open Inventory</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Pharmacy Inventory{% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="fas fa-boxes text-success me-2"></i> Manage Inventory</h2>
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3">Update Stock</h5>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Medicine Name</label>
+                    <input type="text" class="form-control" name="medicine_name" required placeholder="e.g. Paracetamol 500mg">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Quantity (Tablets)</label>
+                    <input type="number" class="form-control" name="stock_quantity" min="0" required value="0">
+                </div>
+                <button type="submit" class="btn btn-success w-100 rounded-pill"><i class="fas fa-save me-2"></i> Save / Update</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3">Current Stock</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Stock Quantity</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in inventory %}
+                        <tr>
+                            <td class="fw-bold text-primary">{{ item.medicine_name }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if item.stock_quantity > 50 else 'warning text-dark' if item.stock_quantity > 0 else 'danger' }} rounded-pill px-3">
+                                    {{ item.stock_quantity }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ item.last_updated }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center py-4 text-muted">No medicines in inventory yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
